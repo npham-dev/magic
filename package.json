@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "cosmos": "cosmos",
     "cosmos-export": "cosmos-export",
-    "fmt": "prettier --write ."
+    "fmt": "prettier --write .",
+    "prepublishOnly": "pnpm run build"
   },
   "files": [
     "dist"
