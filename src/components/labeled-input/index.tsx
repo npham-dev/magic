@@ -3,17 +3,20 @@
 import {
   IconButton,
   Input,
+  RiCheckboxCircleIcon,
+  RiCircleIcon,
   RiEyeCloseIcon,
   RiEyeIcon,
   Text,
   View,
-  type InputProps,
+  type InputProps as InputPropsRoot,
 } from "natmfat";
 import { cn } from "natmfat/lib/cn";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
+import { omit } from "../../utils/omit";
 import { AnimateHeight } from "../animate-height";
 
-export type LabeledInputProps = InputProps & {
+type BaseLabeledInputProps = InputPropsRoot & {
   /**
    * Input label to appear before the input
    */
@@ -32,17 +35,155 @@ export type LabeledInputProps = InputProps & {
   errorId: string;
 };
 
-const inputProps = ({
+type LabeledInputPasswordProps = Omit<BaseLabeledInputProps, "type"> & {
+  type: "password";
+  requirements?: Array<{
+    text: string;
+    test: (value: string) => boolean;
+  }>;
+};
+
+type LabeledInputAnyProps = BaseLabeledInputProps;
+
+type LabeledInputProps = LabeledInputPasswordProps | LabeledInputAnyProps;
+
+export const LabeledInput = ({ ...props }: LabeledInputProps) => {
+  return (
+    <View className="gap-1">
+      <Text color="dimmer" asChild>
+        <label htmlFor={props.name} id={getLabelId(props.name)}>
+          {props.label}
+        </label>
+      </Text>
+      {props.type === "password" ? (
+        <LabeledInputPassword {...props} type="password" />
+      ) : (
+        <LabeledInputAny {...props} />
+      )}
+    </View>
+  );
+};
+
+const LabeledInputErrors: React.FC<
+  Pick<LabeledInputAnyProps, "errors" | "errorId">
+> = ({ errors, errorId }) => {
+  const error = getFirstError(errors);
+
+  return (
+    <AnimateHeight expand={!!errors} childrenHash={error}>
+      <Text className="text-red-default" id={errorId} multiline>
+        {error}
+      </Text>
+    </AnimateHeight>
+  );
+};
+
+const LabeledInputAny: React.FC<LabeledInputAnyProps> = (props) => {
+  return (
+    <>
+      <Input {...transformInputProps(props)} />
+      <LabeledInputErrors {...props} />
+    </>
+  );
+};
+
+const LabeledInputPassword: React.FC<LabeledInputPasswordProps> = ({
+  requirements = [],
+  onClick,
+  onChange,
+  className,
+  ...props
+}) => {
+  const [value, setValue] = useState("");
+  const [expand, setExpand] = useState(false);
+  const [reveal, setReveal] = useState(false);
+
+  return (
+    <>
+      <View className="relative">
+        <Input
+          {...transformInputProps({
+            ...props,
+            className: cn(className, "pr-8"),
+          })}
+          type={reveal ? "text" : "password"}
+          placeholder="••••••••"
+          onClick={useCallback(
+            (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
+              if (onClick) {
+                onClick(e);
+              }
+              setExpand(true);
+            },
+            [onClick],
+          )}
+          onChange={(e) => {
+            if (onChange) {
+              onChange(e);
+            }
+            setValue(e.target.value);
+          }}
+        />
+        <IconButton
+          alt="Show Password"
+          className="absolute top-1/2 -translate-y-1/2 right-1"
+          onClick={useCallback(
+            () => setReveal((prevReveal) => !prevReveal),
+            [setReveal],
+          )}
+          type="button"
+        >
+          {reveal ? <RiEyeIcon /> : <RiEyeCloseIcon />}
+        </IconButton>
+      </View>
+      <LabeledInputErrors {...props} />
+      {requirements.length > 0 ? (
+        <AnimateHeight expand={expand}>
+          <View className="py-2 text-foreground-dimmest">
+            {requirements.map(({ text, test }) => (
+              <RequirementView key={text} text={text} fulfilled={test(value)} />
+            ))}
+          </View>
+        </AnimateHeight>
+      ) : null}
+    </>
+  );
+};
+
+export const RequirementView = ({
+  text,
+  fulfilled,
+}: {
+  text: string;
+  fulfilled?: boolean;
+}) => {
+  return (
+    <View
+      className={cn(
+        "flex-row items-center gap-2",
+        fulfilled && "text-foreground-default",
+      )}
+    >
+      {fulfilled ? <RiCheckboxCircleIcon /> : <RiCircleIcon />}
+      <Text>{text}</Text>
+    </View>
+  );
+};
+
+const getLabelId = (name: string) => `label-${name}`;
+
+const transformInputProps = ({
   required,
   errors,
   errorId,
   className,
   ...props
-}: Omit<LabeledInputProps, "label">): InputProps => {
+}: LabeledInputAnyProps): InputPropsRoot => {
   return {
-    ...props,
+    ...omit(props, ["label"]),
     className: cn(className, errors && "border-red-default"),
     "aria-required": required,
+    "aria-labelledby": getLabelId(props.name),
     required: undefined,
     ...(errors
       ? {
@@ -55,56 +196,3 @@ const inputProps = ({
 };
 
 const getFirstError = (error?: string[]) => (error ? error[0] : undefined);
-
-export const LabeledInput = (props: LabeledInputProps) => {
-  const error = getFirstError(props.errors);
-
-  return (
-    <View className="gap-1">
-      <Text color="dimmer" asChild>
-        <label htmlFor={props.name}>{props.label}</label>
-      </Text>
-
-      {props.type === "password" ? (
-        <PasswordInput {...props} />
-      ) : (
-        <TextInput {...props} />
-      )}
-
-      <AnimateHeight expand={!!props.errors} childrenHash={error}>
-        <Text className="text-red-default" id={props.errorId} multiline>
-          {error}
-        </Text>
-      </AnimateHeight>
-    </View>
-  );
-};
-
-const TextInput: React.FC<LabeledInputProps> = (props) => {
-  return <Input {...inputProps(props)} />;
-};
-
-const PasswordInput: React.FC<LabeledInputProps> = ({
-  className,
-  ...props
-}) => {
-  const [show, setShow] = useState(false);
-
-  return (
-    <View className="relative">
-      <Input
-        {...inputProps({ ...props, className: cn(className, "pr-8") })}
-        type={show ? "text" : "password"}
-        placeholder="••••••••"
-      />
-      <IconButton
-        alt="Show Password"
-        className="absolute top-1/2 -translate-y-1/2 right-1"
-        onClick={() => setShow((prevShow) => !prevShow)}
-        type="button"
-      >
-        {show ? <RiEyeIcon /> : <RiEyeCloseIcon />}
-      </IconButton>
-    </View>
-  );
-};

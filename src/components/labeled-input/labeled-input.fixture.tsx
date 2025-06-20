@@ -11,7 +11,22 @@ const schema = z.object({
   username: z
     .string({ message: "Email is a required field" })
     .email("Email must be a valid email"),
-  password: z.string({ message: "Password is a required field" }),
+  password: z
+    .string({ message: "Password is a required field" })
+    .min(8, { message: "Password must be at least 8 characters" })
+    .max(72, { message: "Password cannot exceed 72 characters" })
+    .refine((password) => /[A-Z]/.test(password), {
+      message: "Password must contain at least one uppercase letter",
+    })
+    .refine((password) => /[a-z]/.test(password), {
+      message: "Password must contain at least one lowercase letter",
+    })
+    .refine((password) => /[0-9]/.test(password), {
+      message: "Password must contain at least one number",
+    })
+    .refine((password) => /[$&+,:;=?@#|'<>.^*()%!-]/.test(password), {
+      message: "Password must contain at least one special character",
+    }),
 });
 
 export default () => {
@@ -25,9 +40,10 @@ export default () => {
 
   return (
     <Wrapper className="max-w-sm w-full">
-      <View className="gap-2 w-full" asChild>
+      <View className="gap-2" asChild>
         <form id={form.id} onSubmit={form.onSubmit}>
           <LabeledInput
+            type="text"
             label="Email"
             placeholder="you@example.com"
             name={fields.username.name}
@@ -40,6 +56,28 @@ export default () => {
             name={fields.password.name}
             errors={fields.password.errors}
             errorId={fields.password.errorId}
+            requirements={[
+              {
+                text: "Uppercase letter",
+                test: (value) => /[A-Z]/.test(value),
+              },
+              {
+                text: "Lowercase letter",
+                test: (value) => /[a-z]/.test(value),
+              },
+              {
+                text: "Number",
+                test: (value) => /[0-9]/.test(value),
+              },
+              {
+                text: "Special character (e.g. !?<>@#$%)",
+                test: (value) => /[$&+,:;=?@#|'<>.^*()%!-]/.test(value),
+              },
+              {
+                text: "8 characters or more",
+                test: (value) => value.length >= 8,
+              },
+            ]}
           />
           <Button color="primary" type="submit">
             Log In
