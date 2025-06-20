@@ -2,10 +2,9 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { glob } from "glob";
 import path from "path";
+import preserveDirectives from "rollup-preserve-directives";
 import dts from "unplugin-dts/vite";
 import { defineConfig } from "vite";
-import { libInjectCss } from "vite-plugin-lib-inject-css";
-import { optimizeCssModules } from "vite-plugin-optimize-css-modules";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 const EXCLUDE = [
@@ -25,9 +24,8 @@ export default defineConfig({
       tsconfigPath: "./tsconfig.app.json",
     }),
     tailwindcss(),
-    libInjectCss(),
-    optimizeCssModules(),
     react(),
+    preserveDirectives(),
   ],
   build: {
     minify: "esbuild",

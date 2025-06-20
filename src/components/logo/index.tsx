@@ -3,7 +3,15 @@
 import { cn } from "natmfat/lib/cn";
 import { useEffect, useRef } from "react";
 
-export const Logo = ({ className }: { className?: string }) => {
+// @todo default profile as prop
+
+export type LogoProps = {
+  defaultGrid?: Grid;
+
+  className?: string;
+};
+
+export const Logo = ({ defaultGrid, className }: LogoProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvas = useRef<ICanvas>(null);
 
@@ -12,7 +20,10 @@ export const Logo = ({ className }: { className?: string }) => {
       return;
     }
 
-    canvas.current = new Canvas(canvasRef.current);
+    canvas.current = new Canvas({
+      canvas: canvasRef.current,
+      defaultGrid,
+    });
 
     return () => {
       canvas.current?.dispose();
@@ -54,37 +65,67 @@ const CELL_ALIVE = 1 as const;
 const CELL_DEAD = 0 as const;
 
 type Cell = typeof CELL_ALIVE | typeof CELL_DEAD;
+type Grid = Board10x10<Cell>;
+
+// https://stackoverflow.com/questions/52489261/can-i-define-an-n-length-tuple-type
+type Tuple10<T> = [T, T, T, T, T, T, T, T, T, T];
+type Board10x10<P> = Tuple10<Tuple10<P>>;
+
+const DEFAULT_GRID: Grid = [
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+  [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+  [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+  [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+  [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+  [0, 1, 1, 1, 0, 0, 1, 1, 1, 0],
+  [0, 1, 1, 1, 0, 0, 1, 1, 1, 0],
+  [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+];
 
 const MARGIN = 20;
 const UPSCALE = 6;
 
+type CanvasArgs = {
+  canvas: HTMLCanvasElement;
+  defaultGrid?: Grid;
+};
+
 class Canvas implements ICanvas {
   private static readonly SIZE: number = 10;
-  private static readonly MARGIN: number = 1;
+  private static readonly INSET: number = 1;
 
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private state: Cell[][];
+  private state: Grid;
   private generating: boolean = false;
 
   private oldFavicon: HTMLLinkElement | null = null;
 
-  constructor(canvas: HTMLCanvasElement) {
+  private defaultGrid: Grid;
+
+  constructor({ canvas, defaultGrid = DEFAULT_GRID }: CanvasArgs) {
     this.canvas = canvas;
+    this.defaultGrid = defaultGrid;
     this.ctx = this.canvas.getContext("2d")!;
     this.state = Canvas.createGrid();
     this.resizeCanvas();
     this.drawDefaultProfile();
   }
 
+  static cloneGrid(grid: Grid) {
+    return grid.map((row) => [...row]) as Grid;
+  }
+
   /**
    * Create an empty grid of dead cells
    * @returns Grid of empty cells
    */
-  static createGrid(): Cell[][] {
+  static createGrid() {
     return new Array(Canvas.SIZE)
       .fill(0)
-      .map(() => new Array(Canvas.SIZE).fill(0).map(() => CELL_DEAD));
+      .map(() => new Array(Canvas.SIZE).fill(0).map(() => CELL_DEAD)) as Grid;
   }
 
   /**
@@ -94,8 +135,8 @@ class Canvas implements ICanvas {
     const grid = Canvas.createGrid();
 
     // randomly generate a new avatar
-    for (let y = Canvas.MARGIN; y < Canvas.SIZE - Canvas.MARGIN; y++) {
-      for (let x = Canvas.MARGIN; x < Canvas.SIZE / 2; x++) {
+    for (let y = Canvas.INSET; y < Canvas.SIZE - Canvas.INSET; y++) {
+      for (let x = Canvas.INSET; x < Canvas.SIZE / 2; x++) {
         const cell = Math.random() > 0.5 ? CELL_ALIVE : CELL_DEAD;
         grid[y][x] = cell;
         grid[y][Canvas.SIZE - x - 1] = cell;
@@ -106,19 +147,7 @@ class Canvas implements ICanvas {
   }
 
   drawDefaultProfile() {
-    this.state = [
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
-      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
-      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-      [0, 1, 1, 1, 0, 0, 1, 1, 1, 0],
-      [0, 1, 1, 1, 0, 0, 1, 1, 1, 0],
-      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ] as Cell[][];
-
+    this.state = Canvas.cloneGrid(this.defaultGrid);
     this.draw();
   }
   /**

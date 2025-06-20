@@ -5,9 +5,22 @@ import { Wrapper } from "../../wrapper";
 export default (
   <Wrapper>
     <View className="flex-row items-center gap-2">
-      <Logo />
+      <Logo
+        defaultGrid={[
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+          [0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+          [0, 0, 0, 0, 0, 1, 0, 1, 0, 0],
+          [0, 0, 0, 0, 1, 0, 1, 0, 0, 0],
+          [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+          [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+          [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+          [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]}
+      />
       <Heading size="subheadDefault" className="font-mono font-bold">
-        npham_dev
+        @natmat/magic
       </Heading>
     </View>
   </Wrapper>
