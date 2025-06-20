@@ -1,8 +1,6 @@
 "use client";
 
-import { tokens } from "natmfat/lib/tokens";
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
-import styles from "./animate-height.module.css";
 
 type AnimateHeightProps = {
   expand?: boolean;
@@ -28,7 +26,8 @@ export const AnimateHeight = ({
 
     const clonedRef = ref.current.cloneNode(true) as HTMLElement;
     clonedRef.removeAttribute("style");
-    clonedRef.className = styles.cloned;
+    clonedRef.className =
+      "h-fit fixed top-0 left-0 select-none pointer-events-none invisible opacity-0";
     clonedRef.style.width = `${ref.current.offsetWidth}px`;
     clonedRef.ariaHidden = "true";
     document.body.appendChild(clonedRef);
@@ -40,15 +39,11 @@ export const AnimateHeight = ({
     <div
       ref={ref}
       aria-hidden={!expand}
-      className={styles.animateHeight}
+      className="duration-chill ease-chill transition-opaciy transition-height overflow-y-hidden"
       style={{
         ...(expand
           ? { height: `${contentHeight}px`, opacity: 1 }
           : { height: "0px", opacity: 0 }),
-        transitionDuration: tokens.transitionDurationChill,
-        transitionTimingFunction: tokens.transitionTimingFunctionChill,
-        transitionProperty: "height, opacity",
-        overflowY: "hidden",
       }}
     >
       {children}

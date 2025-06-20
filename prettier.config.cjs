@@ -8,7 +8,7 @@ const config = {
   trailingComma: "all",
   singleQuote: false,
   semi: true,
-  plugins: ["prettier-plugin-organize-imports"],
+  plugins: ["prettier-plugin-organize-imports", "prettier-plugin-tailwindcss"],
 };
 
 module.exports = config;

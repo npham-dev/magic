@@ -2,7 +2,6 @@
 
 import { cn } from "natmfat/lib/cn";
 import { useEffect, useRef } from "react";
-import styles from "./logo.module.css";
 
 export const Logo = ({ className }: { className?: string }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -21,9 +20,15 @@ export const Logo = ({ className }: { className?: string }) => {
   }, []);
 
   return (
-    <div className={cn(styles.logo, className)}>
+    <div
+      className={cn(
+        "rounded-default aspect-square h-8 w-8 cursor-pointer overflow-hidden select-none",
+        className,
+      )}
+      style={{ backgroundColor: "#710b2c" }}
+    >
       <canvas
-        className={styles.logoCanvas}
+        className="disable-blur aspect-square h-8 w-8"
         ref={canvasRef}
         onClick={() => canvas.current?.reset()}
       ></canvas>

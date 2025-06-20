@@ -2,23 +2,31 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { glob } from "glob";
 import path from "path";
+import dts from "unplugin-dts/vite";
 import { defineConfig } from "vite";
-import dts from "vite-plugin-dts";
 import { libInjectCss } from "vite-plugin-lib-inject-css";
 import { optimizeCssModules } from "vite-plugin-optimize-css-modules";
+import tsconfigPaths from "vite-tsconfig-paths";
 
-const EXCLUDE_FIXTURES = ["src/**/*.fixture.tsx", "src/fixture/**/*"];
+const EXCLUDE = [
+  "node_modules/**",
+  "src/**/*.fixture.tsx",
+  "src/fixture/**/*",
+  "./src/wrapper.tsx",
+];
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    tsconfigPaths(),
+    dts({
+      include: ["src/**"],
+      exclude: EXCLUDE,
+      tsconfigPath: "./tsconfig.app.json",
+    }),
     tailwindcss(),
     libInjectCss(),
     optimizeCssModules(),
-    dts({
-      include: ["src"],
-      exclude: ["node_modules/**", ...EXCLUDE_FIXTURES],
-    }),
     react(),
   ],
   build: {
@@ -31,10 +39,13 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [
+        // peer dependency
         "react",
         "react/jsx-runtime",
         "react-dom",
         "namtfat",
+
+        // for demos
         "@conform-to/react",
         "@conform-to/zod",
         "zod",
@@ -46,9 +57,9 @@ export default defineConfig({
               "src/index.ts",
               "src/components/**/!(*.d).{ts,tsx}",
               "src/hooks/**/!(*.d).{ts,tsx}",
-              "src/types.ts",
+              "src/lib/**/!(*.d).{ts,tsx}",
             ],
-            { ignore: EXCLUDE_FIXTURES },
+            { ignore: EXCLUDE },
           )
           .map((file) => [
             path.relative(

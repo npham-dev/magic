@@ -13,7 +13,7 @@ import {
 } from "natmfat";
 import { cn } from "natmfat/lib/cn";
 import React, { useCallback, useState } from "react";
-import { omit } from "../../utils/omit";
+import { omit } from "../../lib/omit";
 import { AnimateHeight } from "../animate-height";
 
 type BaseLabeledInputProps = InputPropsRoot & {
@@ -126,7 +126,7 @@ const LabeledInputPassword: React.FC<LabeledInputPasswordProps> = ({
         />
         <IconButton
           alt="Show Password"
-          className="absolute top-1/2 -translate-y-1/2 right-1"
+          className="absolute top-1/2 right-1 -translate-y-1/2"
           onClick={useCallback(
             () => setReveal((prevReveal) => !prevReveal),
             [setReveal],
@@ -139,7 +139,7 @@ const LabeledInputPassword: React.FC<LabeledInputPasswordProps> = ({
       <LabeledInputErrors {...props} />
       {requirements.length > 0 ? (
         <AnimateHeight expand={expand}>
-          <View className="py-2 text-foreground-dimmest">
+          <View className="text-foreground-dimmest py-2">
             {requirements.map(({ text, test }) => (
               <RequirementView key={text} text={text} fulfilled={test(value)} />
             ))}

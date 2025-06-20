@@ -6,7 +6,7 @@ export default (
   <Wrapper>
     <View className="flex-row items-center gap-2">
       <Logo />
-      <Heading size="subheadDefault" className="font-bold font-mono">
+      <Heading size="subheadDefault" className="font-mono font-bold">
         npham_dev
       </Heading>
     </View>

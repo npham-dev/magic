@@ -39,7 +39,7 @@ export default () => {
   });
 
   return (
-    <Wrapper className="max-w-sm w-full">
+    <Wrapper className="w-full max-w-sm">
       <View className="gap-2" asChild>
         <form id={form.id} onSubmit={form.onSubmit}>
           <LabeledInput
