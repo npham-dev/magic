@@ -43,7 +43,7 @@ export default defineConfig({
         "react",
         "react/jsx-runtime",
         "react-dom",
-        "namtfat",
+        "natmfat",
 
         // for demos
         "@conform-to/react",
