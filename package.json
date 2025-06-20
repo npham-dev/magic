@@ -1,17 +1,37 @@
 {
   "name": "@natmfat/magic",
-  "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "build:lib": "tsc -b && vite build --config vite.config.lib.ts",
+    "build": "tsc -b && vite build --config vite.config.lib.ts",
     "lint": "eslint .",
     "preview": "vite preview",
     "cosmos": "cosmos",
     "cosmos-export": "cosmos-export",
     "fmt": "prettier --write ."
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/*/index.d.ts",
+      "default": "./dist/components/*/index.js"
+    },
+    "./hooks/*": {
+      "types": "./dist/hooks/*/index.d.ts",
+      "default": "./dist/hooks/*/index.js"
+    },
+    "./lib/*": {
+      "types": "./dist/lib/*/index.d.ts",
+      "default": "./dist/lib/*/index.js"
+    }
   },
   "dependencies": {
     "@conform-to/react": "^1.7.2",
