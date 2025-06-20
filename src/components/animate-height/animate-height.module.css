@@ -1,0 +1,18 @@
+.cloned {
+  height: fit-content;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  user-select: none;
+  visibility: hidden;
+  opacity: 0;
+  z-index: -1;
+}
+
+.animateHeight {
+  transition-duration: var(--transition-duration-chill);
+  transition-timing-function: var(--transition-timing-function-chill);
+  transition-property: height, opacity;
+  overflow-y: hidden;
+}
