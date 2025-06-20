@@ -1,3 +1,5 @@
+"use client";
+
 import { IconButton } from "natmfat/components/IconButton";
 import { RiCheckIcon } from "natmfat/icons/RiCheckIcon";
 import { RiClipboardIcon } from "natmfat/icons/RiClipboardIcon";
